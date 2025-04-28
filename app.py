@@ -7,6 +7,7 @@ from PIL import Image
 import io
 import base64
 from torchvision.models.vgg import VGG
+from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
 
@@ -23,38 +24,51 @@ model.eval()
 category_map = get_category_map()
 Chinese_tag = get_Chinese_tag()
 
-@app.route('/',methods=['GET'])
+
+def process_image(file, classification_type):
+    try:
+        img = Image.open(file.stream)
+        img_tensor = preprocess_image(img)
+        img_tensor = img_tensor.to(device)
+        with torch.no_grad():
+            output = model(img_tensor)
+        predicted_label = torch.argmax(output).item()
+
+        if classification_type == 'category':
+            category = category_map.get(predicted_label, "未分类")
+        else:
+            category = Chinese_tag.get(predicted_label, "未分类")
+
+        img_bytes = io.BytesIO()
+        img.save(img_bytes, format='PNG')
+        img_bytes.seek(0)
+        img_base64 = base64.b64encode(img_bytes.read()).decode('utf-8')
+        return category, img_base64
+    except Exception as e:
+        print(f"处理文件时出错: {e}")
+        return None, None
+
+
+@app.route('/', methods=['GET'])
 def index():
     return send_from_directory(app.static_folder, 'front.html')
+
 
 @app.route('/upload', methods=['POST'])
 def upload():
     classification_type = request.form.get('classification_type', 'category')
     files = request.files.getlist('images')
     results = {}
-    for file in files:
-        try:
-            img = Image.open(file.stream)
-            img_tensor = preprocess_image(img)
-            img_tensor = img_tensor.to(device)
-            with torch.no_grad():
-                output = model(img_tensor)
-            predicted_label = torch.argmax(output).item()
 
-            if classification_type == 'category':
-                category = category_map.get(predicted_label, "未分类")
-            else:
-                category = Chinese_tag.get(predicted_label, "未分类")
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = [executor.submit(process_image, file, classification_type) for file in files]
+        for future in futures:
+            category, img_base64 = future.result()
+            if category and img_base64:
+                if category not in results:
+                    results[category] = []
+                results[category].append(img_base64)
 
-            if category not in results:
-                results[category] = []
-            img_bytes = io.BytesIO()
-            img.save(img_bytes, format='PNG')
-            img_bytes.seek(0)
-            img_base64 = base64.b64encode(img_bytes.read()).decode('utf-8')
-            results[category].append(img_base64)
-        except Exception as e:
-            print(f"处理文件时出错: {e}")
     return jsonify(results)
 
 
