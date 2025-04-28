@@ -8,12 +8,29 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
     <style>
-        .hover-scale {
+       .hover-scale {
             transition: transform 0.3s ease;
         }
 
-        .hover-scale:hover {
+       .hover-scale:hover {
             transform: scale(1.05);
+        }
+
+       .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+       .image-container img {
+            width: 180px;  /* 调整图片宽度 */
+            height: 180px; /* 调整图片高度 */
+            object-fit: cover; /* 保持图片比例并填充容器 */
+            margin: 10px;
+        }
+
+       .category-section {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -58,24 +75,25 @@
                 resultsContainer.innerHTML = '';
                 for (const [category, images] of Object.entries(results)) {
                     const categoryDiv = document.createElement('div');
+                    categoryDiv.classList.add('category-section');
                     categoryDiv.innerHTML = `<h2 class="text-2xl font-bold mb-2">${category}</h2>`;
                     const downloadButton = document.createElement('button');
                     downloadButton.textContent = `下载 ${category} 图片`;
-                    downloadButton.classList.add('bg-green-500', 'text-white', 'py-2', 'px-4', 'rounded', 'mb-4', 'hover:bg-green-600', 'hover-scale');
+                    downloadButton.classList.add('bg-green-500', 'text-white', 'py-2', 'px-4', 'rounded','mb-4', 'hover:bg-green-600', 'hover-scale');
                     downloadButton.addEventListener('click', () => {
                         window.location.href = `/download/${category}`;
                     });
                     categoryDiv.appendChild(downloadButton);
-                    const imagesDiv = document.createElement('div');
+                    const imageContainer = document.createElement('div');
+                    imageContainer.classList.add('image-container');
                     for (const img of images) {
                         const imgElement = document.createElement('img');
                         imgElement.src = `data:image/png;base64,${img}`;
                         imgElement.alt = category;
-                        imgElement.width = 200;
-                        imgElement.classList.add('mb-2', 'hover-scale');
-                        imagesDiv.appendChild(imgElement);
+                        imgElement.classList.add('hover-scale');
+                        imageContainer.appendChild(imgElement);
                     }
-                    categoryDiv.appendChild(imagesDiv);
+                    categoryDiv.appendChild(imageContainer);
                     resultsContainer.appendChild(categoryDiv);
                 }
             } catch (error) {
