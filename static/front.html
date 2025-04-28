@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片分类</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <style>
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div id="upload-page" class="flex flex-col items-center justify-center h-screen">
+        <h1 class="text-3xl font-bold mb-4">图片分类</h1>
+        <form id="upload-form" class="bg-white p-8 rounded shadow-md">
+            <input type="file" name="images" multiple class="mb-4">
+            <select name="classification_type" id="classification-type" class="mb-4">
+                <option value="category">大类分类</option>
+                <option value="chinese_tag">小类分类</option>
+            </select>
+            <button type="submit"
+                class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 hover-scale">分类</button>
+        </form>
+    </div>
+    <div id="result-page" class="hidden p-8">
+        <button id="back-button"
+            class="bg-gray-500 text-white py-2 px-4 rounded mb-4 hover:bg-gray-600 hover-scale">返回主页面</button>
+        <div id="results-container"></div>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('upload-form');
+        const uploadPage = document.getElementById('upload-page');
+        const resultPage = document.getElementById('result-page');
+        const backButton = document.getElementById('back-button');
+        const resultsContainer = document.getElementById('results-container');
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(uploadForm);
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const results = await response.json();
+                uploadPage.classList.add('hidden');
+                resultPage.classList.remove('hidden');
+                resultsContainer.innerHTML = '';
+                for (const [category, images] of Object.entries(results)) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.innerHTML = `<h2 class="text-2xl font-bold mb-2">${category}</h2>`;
+                    const downloadButton = document.createElement('button');
+                    downloadButton.textContent = `下载 ${category} 图片`;
+                    downloadButton.classList.add('bg-green-500', 'text-white', 'py-2', 'px-4', 'rounded', 'mb-4', 'hover:bg-green-600', 'hover-scale');
+                    downloadButton.addEventListener('click', () => {
+                        window.location.href = `/download/${category}`;
+                    });
+                    categoryDiv.appendChild(downloadButton);
+                    const imagesDiv = document.createElement('div');
+                    for (const img of images) {
+                        const imgElement = document.createElement('img');
+                        imgElement.src = `data:image/png;base64,${img}`;
+                        imgElement.alt = category;
+                        imgElement.width = 200;
+                        imgElement.classList.add('mb-2', 'hover-scale');
+                        imagesDiv.appendChild(imgElement);
+                    }
+                    categoryDiv.appendChild(imagesDiv);
+                    resultsContainer.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error('上传图片时出错:', error);
+            }
+        });
+
+        backButton.addEventListener('click', () => {
+            uploadPage.classList.remove('hidden');
+            resultPage.classList.add('hidden');
+        });
+    </script>
+</body>
+
+</html>
