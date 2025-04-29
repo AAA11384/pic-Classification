@@ -1,12 +1,11 @@
 import torch
 from PIL import Image
 import torchvision.transforms as transforms
-from getMap import get_category_map, get_English_tag, get_Chinese_tag
+from getMap import get_category_map, get_Chinese_tag
 from image_preprocessing import preprocess_image
 
 # 得到标签集合
 category_map = get_category_map()
-English_tag = get_English_tag()
 Chinese_tag = get_Chinese_tag()
 
 # 加载设备
