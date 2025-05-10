@@ -6,77 +6,271 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>图片分类</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
     <style>
-       .hover-scale {
+        /* 新增的样式 */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #2d3748; /* 深色背景 */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            color: #4fd1c5; /* 鼠标悬停时的颜色 */
+        }
+
+        .main-content {
+            margin-left: 250px; /* 与侧边栏宽度一致 */
+            padding: 20px;
+        }
+
+        /* 其他已有样式保持不变 */
+        .hover-scale {
             transition: transform 0.3s ease;
         }
 
-       .hover-scale:hover {
+        .hover-scale:hover {
             transform: scale(1.05);
         }
 
-       .image-container {
+        .image-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: flex-start;
         }
 
-       .image-container img {
-            width: 180px;  /* 调整图片宽度 */
-            height: 180px; /* 调整图片高度 */
-            object-fit: cover; /* 保持图片比例并填充容器 */
+        .image-container img {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
             margin: 10px;
         }
 
-       .category-section {
+        .category-section {
             margin-bottom: 20px;
         }
     </style>
 </head>
 
-<body class="bg-gray-100">
-    <div id="upload-page" class="flex flex-col items-center justify-center h-screen">
-        <h1 class="text-3xl font-bold mb-4">图片分类</h1>
-        <form id="upload-form" class="bg-white p-8 rounded shadow-md">
-            <input type="file" name="images" multiple class="mb-4">
-            <select name="classification_type" id="classification-type" class="mb-4">
-                <option value="chinese_tag">小类分类</option>
-                <option value="category">大类分类</option>
-            </select>
-            <button type="submit"
-                class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 hover-scale">分类</button>
-        </form>
-    </div>
-    <div id="result-page" class="hidden p-8">
-        <button id="back-button"
-            class="bg-gray-500 text-white py-2 px-4 rounded mb-4 hover:bg-gray-600 hover-scale">返回主页面</button>
-        <div id="results-container"></div>
+<body class="bg-gray-100 flex">
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div>
+            <h2 class="text-2xl font-bold mb-6">菜单</h2>
+            <a href="#" id="personal-info" class="hover:text-teal-400">个人信息</a>
+            <a href="#" id="classification-record" class="hover:text-teal-400">分类记录</a>
+            <a href="#" id="operation-dashboard" class="hover:text-teal-400 font-bold">操作台</a>
+        </div>
+        <div>
+            <p class="text-sm text-gray-400">© 2023 图片分类系统</p>
+        </div>
     </div>
 
-    <script>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <h1 id="welcome-message" class="text-2xl font-bold mb-4"></h1>
+            <!-- 个人信息页面 -->
+            <div id="personal-info-page" class="hidden">
+                <h3 class="text-2xl font-bold mb-6">个人信息</h3>
+
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-8">
+                    <!-- 左侧信息 -->
+                    <div class="space-y-4 text-gray-700 text-lg">
+                        <p><strong>用户名：</strong><span id="username"></span></p>
+                        <p><strong>可用点数：</strong><span id="points"></span></p>
+                        <p><strong>已用存储：</strong><span id="used-storage"></span> MB / 1024 MB</p>
+                    </div>
+
+                    <!-- 右侧图表 -->
+                    <div class="w-48 h-48">
+                        <canvas id="storage-chart" width="200" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 分类记录页面 -->
+            <div id="classification-record-page" class="hidden">
+                <h3 class="text-xl font-bold mb-4">分类记录</h3>
+                <div id="classification-cards-container" class="space-y-4"></div>
+            </div>
+
+
+            <!-- 操作台页面 -->
+            <div id="operation-dashboard-page" class="hidden">
+                <h1 class="text-3xl font-bold mb-4">图片分类</h1>
+                <form id="upload-form" class="bg-white p-8 rounded shadow-md">
+                    <input type="file" name="images" multiple class="mb-4">
+                    <select name="classification_type" id="classification-type" class="mb-4">
+                        <option value="chinese_tag">小类分类</option>
+                        <option value="category">大类分类</option>
+                    </select>
+                    <button type="submit"
+                        class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 hover-scale">分类</button>
+                </form>
+            </div>
+            <div id="result-page" class="hidden p-8">
+                <div id="results-container"></div>
+            </div>
+    </div>
+
+     <script>
+        const personalInfoPage = document.getElementById('personal-info-page');
+        const classificationRecordPage = document.getElementById('classification-record-page');
+        const operationDashboardPage = document.getElementById('operation-dashboard-page');
+        const welcomeMessage = document.getElementById('welcome-message');
+
+        document.addEventListener('DOMContentLoaded', function() {
+    const classificationRecordLink = document.getElementById('classification-record');
+    const classificationCardsContainer = document.getElementById('classification-cards-container');
+
+    classificationRecordLink.addEventListener('click', async function(event) {
+        event.preventDefault();
+
+        // 显示分类记录页面
+        document.querySelectorAll('.main-content > div').forEach(page => page.classList.add('hidden'));
+        document.getElementById('classification-record-page').classList.remove('hidden');
+
+        // 发送请求获取分类记录
+        const response = await fetch('/get_classification_records');
+        const records = await response.json();
+
+        if (response.ok) {
+            // 清空之前的卡片
+            classificationCardsContainer.innerHTML = '';
+
+            // 动态生成卡片
+            records.forEach(record => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow-md hover-scale';
+                card.innerHTML = `
+                    <p><strong>记录ID：</strong>${record.record_id}</p>
+                    <p><strong>类型：</strong>${record.type === 1 ? '小类' : '大类'}</p>
+                    <p><strong>存储使用：</strong>${record.storage_used_mb} MB</p>
+                    <p><strong>点数使用：</strong>${record.points_used}</p>
+                    <p><strong>时间戳：</strong>${record.timestamp}</p>
+                    <p><strong>图片数量：</strong>${record.image_count}</p>
+                `;
+                classificationCardsContainer.appendChild(card);
+            });
+        } else {
+            classificationCardsContainer.innerHTML = '<p>无法加载分类记录，请稍后再试。</p>';
+        }
+    });
+});
+
+
+        // 页面加载时显示个人信息页面
+        window.onload = async () => {
+            const userInfo = await fetch(`/api/userinfo`)
+                .then(response => response.json());
+
+            welcomeMessage.textContent = `您好，${userInfo.username}`;
+            document.getElementById('username').textContent = userInfo.username;
+            document.getElementById('points').textContent = userInfo.points;
+            document.getElementById('used-storage').textContent = userInfo.used_storage_mb.toFixed(2);
+
+            // 渲染存储使用情况的圆环图
+            const ctx = document.getElementById('storage-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['已用存储', '剩余存储'],
+                    datasets: [{
+                        data: [userInfo.used_storage_mb, 1024 - userInfo.used_storage_mb],
+                        backgroundColor: ['#4fd1c5', '#e2e8f0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+
+            showPage('personal-info');
+        };
+
+        // 显示指定页面
+        function showPage(pageId) {
+            personalInfoPage.classList.add('hidden');
+            classificationRecordPage.classList.add('hidden');
+            operationDashboardPage.classList.add('hidden');
+
+            if (pageId === 'operation-dashboard') {
+                // ✅ 清空分类结果页面的内容
+                resultsContainer.innerHTML = '';
+            }
+
+            switch (pageId) {
+                case 'personal-info':
+                    personalInfoPage.classList.remove('hidden');
+                    break;
+                case 'classification-record':
+                    classificationRecordPage.classList.remove('hidden');
+                    break;
+                case 'operation-dashboard':
+                    operationDashboardPage.classList.remove('hidden');
+                    break;
+            }
+        }
+
+        // 菜单点击事件
+        document.getElementById('personal-info').addEventListener('click', () => showPage('personal-info'));
+        document.getElementById('classification-record').addEventListener('click', () => showPage('classification-record'));
+        document.getElementById('operation-dashboard').addEventListener('click', () => showPage('operation-dashboard'));
+
+        // 获取 DOM 元素
         const uploadForm = document.getElementById('upload-form');
-        const uploadPage = document.getElementById('upload-page');
         const resultPage = document.getElementById('result-page');
-        const backButton = document.getElementById('back-button');
         const resultsContainer = document.getElementById('results-container');
 
+        // 表单提交处理逻辑
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(uploadForm);
+
             try {
                 const response = await fetch('/upload', {
                     method: 'POST',
                     body: formData
                 });
+
                 const results = await response.json();
-                uploadPage.classList.add('hidden');
+
+                // 显示结果页面，隐藏其他页面
+                document.querySelectorAll('.main-content > div').forEach(page => page.classList.add('hidden'));
                 resultPage.classList.remove('hidden');
+
+                // 清空旧结果
                 resultsContainer.innerHTML = '';
+
+                // 渲染每个分类及图片
                 for (const [category, images] of Object.entries(results)) {
                     const categoryDiv = document.createElement('div');
                     categoryDiv.classList.add('category-section');
                     categoryDiv.innerHTML = `<h2 class="text-2xl font-bold mb-2">${category}</h2>`;
+
+                    // 下载按钮
                     const downloadButton = document.createElement('button');
                     downloadButton.textContent = `下载 ${category} 图片`;
                     downloadButton.classList.add('bg-green-500', 'text-white', 'py-2', 'px-4', 'rounded','mb-4', 'hover:bg-green-600', 'hover-scale');
@@ -84,6 +278,8 @@
                         window.location.href = `/download/${category}`;
                     });
                     categoryDiv.appendChild(downloadButton);
+
+                    // 图片列表
                     const imageContainer = document.createElement('div');
                     imageContainer.classList.add('image-container');
                     for (const img of images) {
@@ -93,19 +289,26 @@
                         imgElement.classList.add('hover-scale');
                         imageContainer.appendChild(imgElement);
                     }
+
                     categoryDiv.appendChild(imageContainer);
                     resultsContainer.appendChild(categoryDiv);
                 }
+
             } catch (error) {
                 console.error('上传图片时出错:', error);
+                alert('上传失败，请稍后再试');
             }
         });
 
+        // 返回按钮点击 => 显示操作台页面
         backButton.addEventListener('click', () => {
-            uploadPage.classList.remove('hidden');
-            resultPage.classList.add('hidden');
+            resultPage.classList.add('hidden');           // 隐藏结果页
+            resultsContainer.innerHTML = '';              // 清空内容
+            showPage('operation-dashboard');              // 显示操作台页面
         });
-    </script>
+
+     </script>
+
 </body>
 
 </html>

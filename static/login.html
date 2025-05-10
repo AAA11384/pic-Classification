@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录/注册</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 自定义样式 */
+        .form-container {
+            width: 400px;
+            margin: 50px auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .button-primary {
+            background-color: #4fd1c5;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .button-secondary {
+            background-color: #2d3748;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .button-primary:hover {
+            background-color: #38b2ac;
+        }
+
+        .button-secondary:hover {
+            background-color: #1a202c;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <!-- 登录页面 -->
+    <div id="login-page" class="form-container">
+    <h2 class="text-2xl font-bold text-center mb-6">登录</h2>
+    <form id="login-form">
+        <input type="text" name="username" class="input-field" placeholder="用户名" required>
+        <input type="password" name="password" class="input-field" placeholder="密码" required>
+        <button type="submit" class="button-primary w-full">登录</button>
+    </form>
+    <p class="text-center mt-4">没有账号？<a href="#" id="switch-to-register" class="text-teal-500 hover:underline">注册</a></p>
+</div>
+
+<!-- 注册页面 -->
+<div id="register-page" class="form-container hidden">
+    <h2 class="text-2xl font-bold text-center mb-6">注册</h2>
+    <form id="register-form">
+        <input type="text" name="username" class="input-field" placeholder="用户名" required>
+        <input type="password" name="password" class="input-field" placeholder="密码" required>
+        <input type="email" name="email" class="input-field" placeholder="邮箱" required>
+        <div class="flex justify-between">
+            <button type="button" id="back-to-login" class="button-secondary">返回</button>
+            <button type="submit" class="button-primary">提交</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // 切换到注册页面
+    document.getElementById('switch-to-register').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('login-page').classList.add('hidden');
+        document.getElementById('register-page').classList.remove('hidden');
+    });
+
+    // 返回到登录页面
+    document.getElementById('back-to-login').addEventListener('click', () => {
+        document.getElementById('register-page').classList.add('hidden');
+        document.getElementById('login-page').classList.remove('hidden');
+    });
+
+    // 处理登录请求
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
+        const result = await response.json();
+        if (result.success) {
+            window.location.href = '/front';
+        } else {
+            alert(result.message);
+        }
+    });
+
+    // 处理注册请求
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
+        const result = await response.json();
+        if (result.success) {
+            alert('注册成功！');
+            document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('login-page').classList.remove('hidden');
+        } else {
+            alert(result.message);
+        }
+    });
+</script>

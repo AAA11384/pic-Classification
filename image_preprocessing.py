@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from PIL import Image
 
 def preprocess_image(image):
     # 将图像大小调整为VGG16所需的大小（224x224）

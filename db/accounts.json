@@ -1,0 +1,12 @@
+[
+  {"username": "alice", "password": "pass123"},
+  {"username": "bob", "password": "qwerty"},
+  {"username": "charlie", "password": "abc123"},
+  {"username": "diana", "password": "d1ana"},
+  {"username": "eve", "password": "eve321"},
+  {"username": "frank", "password": "frank99"},
+  {"username": "grace", "password": "gracepass"},
+  {"username": "hank", "password": "hankpwd"},
+  {"username": "irene", "password": "irene789"},
+  {"username": "jack", "password": "jack123"}
+]
