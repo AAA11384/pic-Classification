@@ -166,6 +166,10 @@
                     <p><strong>点数使用：</strong>${record.points_used}</p>
                     <p><strong>时间戳：</strong>${record.timestamp}</p>
                     <p><strong>图片数量：</strong>${record.image_count}</p>
+                    <button class="mt-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 hover-scale"
+                        onclick="window.location.href='/download_record/${record.record_id}'">
+                        下载此记录
+                    </button>
                 `;
                 classificationCardsContainer.appendChild(card);
             });

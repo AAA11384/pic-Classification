@@ -1,12 +1,57 @@
 [
-  {"username": "alice", "password": "pass123"},
-  {"username": "bob", "password": "qwerty"},
-  {"username": "charlie", "password": "abc123"},
-  {"username": "diana", "password": "d1ana"},
-  {"username": "eve", "password": "eve321"},
-  {"username": "frank", "password": "frank99"},
-  {"username": "grace", "password": "gracepass"},
-  {"username": "hank", "password": "hankpwd"},
-  {"username": "irene", "password": "irene789"},
-  {"username": "jack", "password": "jack123"}
+    {
+        "username": "alice",
+        "password": "pass123"
+    },
+    {
+        "username": "bob",
+        "password": "qwerty"
+    },
+    {
+        "username": "charlie",
+        "password": "abc123"
+    },
+    {
+        "username": "diana",
+        "password": "d1ana"
+    },
+    {
+        "username": "eve",
+        "password": "eve321"
+    },
+    {
+        "username": "frank",
+        "password": "frank99"
+    },
+    {
+        "username": "grace",
+        "password": "gracepass"
+    },
+    {
+        "username": "hank",
+        "password": "hankpwd"
+    },
+    {
+        "username": "irene",
+        "password": "irene789"
+    },
+    {
+        "username": "jack",
+        "password": "jack123"
+    },
+    {
+        "username": "existing_user",
+        "password": "password",
+        "email": "existing@example.com"
+    },
+    {
+        "username": "new_user",
+        "password": "new_password",
+        "email": "new@example.com"
+    },
+    {
+        "username": "new_user1",
+        "password": "new_password",
+        "email": "new@example.com"
+    }
 ]
