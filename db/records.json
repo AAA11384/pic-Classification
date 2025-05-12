@@ -1,92 +1,92 @@
 [
-  {
-    "record_id": "20250510123456781234",
-    "username": "alice",
-    "type": 1,
-    "storage_used_mb": 1.2,
-    "points_used": 7,
-    "timestamp": "2025-05-10 12:34:56",
-    "image_count": 5
-  },
-  {
-    "record_id": "20250510123456781235",
-    "username": "bob",
-    "type": 0,
-    "storage_used_mb": 2.5,
-    "points_used": 5,
-    "timestamp": "2025-05-10 12:35:01",
-    "image_count": 10
-  },
-  {
-    "record_id": "20250510123456781236",
-    "username": "charlie",
-    "type": 1,
-    "storage_used_mb": 3.3,
-    "points_used": 8,
-    "timestamp": "2025-05-10 12:35:07",
-    "image_count": 7
-  },
-  {
-    "record_id": "20250510123456781237",
-    "username": "diana",
-    "type": 0,
-    "storage_used_mb": 0.9,
-    "points_used": 3,
-    "timestamp": "2025-05-10 12:35:11",
-    "image_count": 3
-  },
-  {
-    "record_id": "20250510123456781238",
-    "username": "eve",
-    "type": 1,
-    "storage_used_mb": 2.0,
-    "points_used": 6,
-    "timestamp": "2025-05-10 12:35:18",
-    "image_count": 6
-  },
-  {
-    "record_id": "20250510123456781239",
-    "username": "frank",
-    "type": 0,
-    "storage_used_mb": 1.5,
-    "points_used": 4,
-    "timestamp": "2025-05-10 12:35:22",
-    "image_count": 4
-  },
-  {
-    "record_id": "20250510123456781240",
-    "username": "grace",
-    "type": 1,
-    "storage_used_mb": 2.1,
-    "points_used": 5,
-    "timestamp": "2025-05-10 12:35:30",
-    "image_count": 5
-  },
-  {
-    "record_id": "20250510123456781241",
-    "username": "hank",
-    "type": 0,
-    "storage_used_mb": 3.0,
-    "points_used": 9,
-    "timestamp": "2025-05-10 12:35:37",
-    "image_count": 9
-  },
-  {
-    "record_id": "20250510123456781242",
-    "username": "irene",
-    "type": 1,
-    "storage_used_mb": 2.9,
-    "points_used": 7,
-    "timestamp": "2025-05-10 12:35:45",
-    "image_count": 6
-  },
-  {
-    "record_id": "20250510123456781243",
-    "username": "jack",
-    "type": 0,
-    "storage_used_mb": 2.2,
-    "points_used": 5,
-    "timestamp": "2025-05-10 12:35:51",
-    "image_count": 4
-  }
+    {
+        "record_id": "20250510123456781234",
+        "username": "alice",
+        "type": 1,
+        "storage_used_mb": 1.2,
+        "points_used": 7,
+        "timestamp": "2025-05-10 12:34:56",
+        "image_count": 5
+    },
+    {
+        "record_id": "20250510123456781235",
+        "username": "bob",
+        "type": 0,
+        "storage_used_mb": 2.5,
+        "points_used": 5,
+        "timestamp": "2025-05-10 12:35:01",
+        "image_count": 10
+    },
+    {
+        "record_id": "20250510123456781236",
+        "username": "charlie",
+        "type": 1,
+        "storage_used_mb": 3.3,
+        "points_used": 8,
+        "timestamp": "2025-05-10 12:35:07",
+        "image_count": 7
+    },
+    {
+        "record_id": "20250510123456781237",
+        "username": "diana",
+        "type": 0,
+        "storage_used_mb": 0.9,
+        "points_used": 3,
+        "timestamp": "2025-05-10 12:35:11",
+        "image_count": 3
+    },
+    {
+        "record_id": "20250510123456781238",
+        "username": "eve",
+        "type": 1,
+        "storage_used_mb": 2.0,
+        "points_used": 6,
+        "timestamp": "2025-05-10 12:35:18",
+        "image_count": 6
+    },
+    {
+        "record_id": "20250510123456781239",
+        "username": "frank",
+        "type": 0,
+        "storage_used_mb": 1.5,
+        "points_used": 4,
+        "timestamp": "2025-05-10 12:35:22",
+        "image_count": 4
+    },
+    {
+        "record_id": "20250510123456781240",
+        "username": "grace",
+        "type": 1,
+        "storage_used_mb": 2.1,
+        "points_used": 5,
+        "timestamp": "2025-05-10 12:35:30",
+        "image_count": 5
+    },
+    {
+        "record_id": "20250510123456781241",
+        "username": "hank",
+        "type": 0,
+        "storage_used_mb": 3.0,
+        "points_used": 9,
+        "timestamp": "2025-05-10 12:35:37",
+        "image_count": 9
+    },
+    {
+        "record_id": "20250510123456781242",
+        "username": "irene",
+        "type": 1,
+        "storage_used_mb": 2.9,
+        "points_used": 7,
+        "timestamp": "2025-05-10 12:35:45",
+        "image_count": 6
+    },
+    {
+        "record_id": "20250510123456781243",
+        "username": "jack",
+        "type": 0,
+        "storage_used_mb": 2.2,
+        "points_used": 5,
+        "timestamp": "2025-05-10 12:35:51",
+        "image_count": 4
+    }
 ]

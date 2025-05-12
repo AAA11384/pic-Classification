@@ -148,7 +148,7 @@
         document.getElementById('classification-record-page').classList.remove('hidden');
 
         // 发送请求获取分类记录
-        const response = await fetch('/get_classification_records');
+        const response = await fetch('/get_classification_records', { cache: 'no-cache' });
         const records = await response.json();
 
         if (response.ok) {
@@ -166,9 +166,11 @@
                     <p><strong>点数使用：</strong>${record.points_used}</p>
                     <p><strong>时间戳：</strong>${record.timestamp}</p>
                     <p><strong>图片数量：</strong>${record.image_count}</p>
-                    <button class="mt-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 hover-scale"
-                        onclick="window.location.href='/download_record/${record.record_id}'">
+                    <button class="mt-2 bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 hover-scale" onclick="downloadRecord('${record.record_id}')">
                         下载此记录
+                    </button>
+                    <button class="mt-2 ml-2 bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 hover-scale" onclick="deleteRecord('${record.record_id}')">
+                        删除此记录
                     </button>
                 `;
                 classificationCardsContainer.appendChild(card);
@@ -239,7 +241,42 @@
         }
 
         // 菜单点击事件
-        document.getElementById('personal-info').addEventListener('click', () => showPage('personal-info'));
+        // 修改个人信息链接的点击事件
+        document.getElementById('personal-info').addEventListener('click', async () => {
+            showPage('personal-info');
+            // 重新获取用户信息
+            const userInfo = await fetch(`/api/userinfo`)
+                .then(response => response.json());
+        
+            welcomeMessage.textContent = `您好，${userInfo.username}`;
+            document.getElementById('username').textContent = userInfo.username;
+            document.getElementById('points').textContent = userInfo.points;
+            document.getElementById('used-storage').textContent = userInfo.used_storage_mb.toFixed(2);
+        
+            // 重新渲染存储使用情况的圆环图
+            const ctx = document.getElementById('storage-chart').getContext('2d');
+            if (window.storageChart) {
+                window.storageChart.destroy();
+            }
+            window.storageChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['已用存储', '剩余存储'],
+                    datasets: [{
+                        data: [userInfo.used_storage_mb, 1024 - userInfo.used_storage_mb],
+                        backgroundColor: ['#4fd1c5', '#e2e8f0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+        });
         document.getElementById('classification-record').addEventListener('click', () => showPage('classification-record'));
         document.getElementById('operation-dashboard').addEventListener('click', () => showPage('operation-dashboard'));
 
@@ -316,3 +353,26 @@
 </body>
 
 </html>
+
+
+<script>
+async function deleteRecord(recordId) {
+    try {
+        const response = await fetch(`/delete_record/${recordId}`, { method: 'DELETE' });
+        if (response.ok) {
+            alert('记录删除成功');
+            // 重新加载分类记录
+            const classificationRecordLink = document.getElementById('classification-record');
+            classificationRecordLink.click();
+            // 重新获取用户信息
+            const personalInfoLink = document.getElementById('personal-info');
+            personalInfoLink.click();
+        } else {
+            alert('记录删除失败，请稍后再试');
+        }
+    } catch (error) {
+        console.error('删除记录时出错:', error);
+        alert('删除记录时出错，请稍后再试');
+    }
+}
+</script>

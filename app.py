@@ -9,6 +9,11 @@ import io
 import base64
 from torchvision.models.vgg import VGG
 from concurrent.futures import ThreadPoolExecutor
+import uuid
+import zipfile
+from datetime import datetime
+import random
+import string
 
 app = Flask(__name__)
 app.secret_key = "pass123"
@@ -27,12 +32,13 @@ def load_data():
     with open('db/records.json', 'r', encoding='utf-8') as f:
         records = json.load(f)
 
-@app.before_request
-def startup():
-    load_data()
-    print("数据已加载：账户 %d，用户信息 %d，记录 %d" % (
-        len(accounts), len(user_info), len(records)
-    ))
+# 删除以下代码
+# @app.before_request
+# def startup():
+#     load_data()
+#     print("数据已加载：账户 %d，用户信息 %d，记录 %d" % (
+#         len(accounts), len(user_info), len(records)
+#     ))
 
 # 允许特定的全局类
 torch.serialization.add_safe_globals([VGG])
@@ -87,6 +93,7 @@ def upload():
     classification_type = request.form.get('classification_type', 'category')
     files = request.files.getlist('images')
     results = {}
+    username = session.get('username', 'guest')
 
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = [executor.submit(process_image, file, classification_type) for file in files]
@@ -97,7 +104,45 @@ def upload():
                     results[category] = []
                 results[category].append(img_base64)
 
-    return jsonify(results)
+        # 生成 record_id
+        now = datetime.now()
+        date_str = now.strftime("%Y%m%d")
+        nanoseconds_str = str(now.microsecond)
+        random_str = ''.join(random.choices(string.digits, k=4))
+        record_id = f'{date_str}{nanoseconds_str}{random_str}'
+
+        # 创建存储目录
+        user_storage_dir = os.path.join('storage', username)
+        if not os.path.exists(user_storage_dir):
+            os.makedirs(user_storage_dir)
+
+        # 打包分类结果
+        zip_path = os.path.join(user_storage_dir, f'{record_id}.zip')
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            for category, images in results.items():
+                for i, img_base64 in enumerate(images):
+                    img_data = base64.b64decode(img_base64)
+                    img_path = os.path.join(category, f'{i}.png')
+                    zipf.writestr(img_path, img_data)
+
+        # 生成记录
+        new_record = {
+            "record_id": record_id,
+            "username": username,
+            "type": 1 if classification_type == 'category' else 0,
+            "storage_used_mb": round(os.path.getsize(zip_path) / (1024 * 1024), 2),
+            "points_used": sum(len(images) for images in results.values()),  
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "image_count": sum(len(images) for images in results.values())
+        }
+        records.append(new_record)
+        print("新记录已添加：", new_record, "总记录数：", len(records))
+
+        # 将更新后的 records 保存回文件
+        with open('db/records.json', 'w', encoding='utf-8') as f:
+            json.dump(records, f, ensure_ascii=False, indent=4)
+
+        return jsonify(results)
 
 
 @app.route('/download/<category>', methods=['GET'])
@@ -135,8 +180,9 @@ def get_classification_records():
     username = session.get('username')
     if not username:
         return jsonify({'error': '用户未登录'}), 401
-
+    print(records)
     user_records = [record for record in records if record['username'] == username]
+    print("返回符合条件的记录条数为" + str(len(user_records)))
     return jsonify(user_records)
 
 @app.route('/register', methods=['POST'])
@@ -164,10 +210,48 @@ def get_user_info():
     print(username)
     user = next((u for u in user_info if u['username'] == username), None)
     if user:
-        print(user)
-        return jsonify(user)
+        # 计算该用户在 records.json 中所有记录的 storage_used_mb 总和
+        total_storage = sum(record['storage_used_mb'] for record in records if record['username'] == username)
+        user_with_storage = user.copy()
+        user_with_storage['used_storage_mb'] = total_storage
+        print(user_with_storage)
+        return jsonify(user_with_storage)
     print("none user")
     return jsonify({"error": "User not found"}), 404
+
+
+@app.route('/download_record/<record_id>', methods=['GET'])
+def download_record(record_id):
+    username = session.get('username')
+    if not username:
+        return jsonify({'error': '用户未登录'}), 401
+    zip_path = os.path.join('storage', username, f'{record_id}.zip')
+    if os.path.exists(zip_path):
+        return send_file(zip_path, as_attachment=True)
+    else:
+        return jsonify({'error': '文件不存在'}), 404
+
+
+@app.route('/delete_record/<record_id>', methods=['DELETE'])
+def delete_record(record_id):
+    username = session.get('username')
+    if not username:
+        return jsonify({'error': '用户未登录'}), 401
+
+    # 删除存储中的压缩文件
+    zip_path = os.path.join('storage', username, f'{record_id}.zip')
+    if os.path.exists(zip_path):
+        os.remove(zip_path)
+
+    # 从 records 全局变量中删除记录
+    global records
+    records = [record for record in records if record['record_id'] != record_id]
+
+    # 将更新后的 records 保存回文件
+    with open('db/records.json', 'w', encoding='utf-8') as f:
+        json.dump(records, f, ensure_ascii=False, indent=4)
+
+    return jsonify({'message': '记录删除成功'})
 
 
 if __name__ == '__main__':
