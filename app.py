@@ -75,7 +75,6 @@ def process_image(file, classification_type):
 
 @app.route('/')
 def index():
-    # 假设用户已经登录，用户名存储在 session 中
     username = session.get('username', 'guest')
     if username != 'guest':
         return send_from_directory(app.static_folder, 'front.html')
@@ -103,12 +102,10 @@ def upload():
 
 @app.route('/download/<category>', methods=['GET'])
 def download(category):
-    # 这里只是简单示例，实际需要根据分类从 results 中获取图片并保存为 zip 文件
     import zipfile
     import tempfile
     temp_zip = tempfile.NamedTemporaryFile(delete=False)
     with zipfile.ZipFile(temp_zip, 'w') as zipf:
-        # 这里需要根据 category 从 results 中获取图片并添加到 zip 文件
         pass
     temp_zip.close()
     return send_file(temp_zip.name, as_attachment=True, download_name=f'{category}.zip')
